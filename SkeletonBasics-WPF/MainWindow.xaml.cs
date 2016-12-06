@@ -10,8 +10,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows;
     using System.Windows.Media;
     using Microsoft.Kinect;
-
-
+    using Maps.MapControl.WPF.Design;
+    using Maps.MapControl.WPF;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -205,7 +205,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             if (null == this.sensor)
             {
-               // Message.Text = "Kinect Sensor is not Powered";
+                MessageBox.Show("Kinect Sensor is not Powered");
             }
         }
 
@@ -303,7 +303,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="drawingContext">drawing context to draw to</param>
         private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
         {
-            Rect rect = new Rect(new Point(160, 100), new Size(320, 80));
+            //Rect rect = new Rect(new Point(160, 100), new Size(320, 80));
             // Render Torso
             //this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
             //this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
@@ -355,8 +355,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);  // draw everything : needed !
                 }
-
-
+                    System.Console.WriteLine(joint.JointType);
+                    System.Console.WriteLine(joint.Position.X + "  : " + myMap.ZoomLevel);
+                    LocationConverter locConv = new LocationConverter();
+                    locConv.ConvertFrom("52.520008,13.404954");
+                    myMap.AnimationLevel = Maps.MapControl.WPF.AnimationLevel.Full;
+                   myMap.SetView((Location)locConv.ConvertFrom("52.520008,13.404954"), 8);
             }
 
         }
