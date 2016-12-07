@@ -14,12 +14,22 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Maps.MapControl.WPF.Design;
     using Maps.MapControl.WPF;
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        // some high value is assigned at the begining to calibrate the hands for zoom in zoom out
+        int referenceDistanceBetweenHands = 10000;
+        // the distance between hands from kinect is in meters which varies approx. 0 to 1. this needs to be scaled to the zoom level allowed in Bing i.e 1-20.
+        private int zoomScalingValue = 19;
+
+        /**List<Double> leftHandX = new List<double>();
+        List<Double> leftHandY = new List<double>();
+        List<Double> rightHandX = new List<double>();
+        List<Double> rightHandY = new List<double>();**/
         /// <summary>
         /// Width of output drawing : window vertical
         /// </summary>
@@ -94,6 +104,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         public MainWindow()
         {
             InitializeComponent();
+            myMap.AnimationLevel = Maps.MapControl.WPF.AnimationLevel.Full; // adding a animation level to the Map to avoid jerk while transition
         }
 
         // Create a DrawingVisual that contains a rectangle.
@@ -221,6 +232,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (null != this.sensor)
             {
                 this.sensor.Stop();
+
+                /** leftHandX.Sort();
+                 leftHandY.Sort();
+                 rightHandX.Sort();
+                 rightHandX.Sort();
+                 Console.WriteLine("Left Hand max X: " + leftHandX[leftHandX.Count - 1] + ", Left Hand min X: " + leftHandX[0] + ", Right Hand max X: " + rightHandX[rightHandX.Count - 1] + ", Right Hand min X: " + rightHandX[0]);
+                 Console.WriteLine("Left Hand max Y: " + leftHandY[leftHandY.Count - 1] + ", Left Hand min Y " + leftHandY[0] + ", Right Hand max Y: " + rightHandY[rightHandY.Count - 1] + ", Right Hand min Y: " + rightHandY[0]);        **/
             }
         }
 
@@ -367,16 +385,43 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     drawBrush = this.inferredJointBrush;                 
                 }
 
-                if (drawBrush != null)
-                {
-                    drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);  // draw everything : needed !
-                }
-                    System.Console.WriteLine(joint.JointType);
-                    System.Console.WriteLine(joint.Position.X + "  : " + myMap.ZoomLevel);
+                    if (drawBrush != null)
+                    {
+                        drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);  // draw everything : needed !
+                        zoomInZoomOutMap(skeleton.Joints[JointType.HandLeft], skeleton.Joints[JointType.HandRight]);
+                        //Console.WriteLine(refRightHand.Position.X);
+                       /** if (joint.JointType == JointType.HandLeft)
+                        {
+                            leftHandX.Add(joint.Position.X);
+                           // leftHandY.Add(joint.Position.Y);
+                        }
+                        else if (joint.JointType == JointType.HandRight)
+                        {
+                            rightHandX.Add(joint.Position.X);
+                            rightHandY.Add(joint.Position.Y);
+                        }**/
+                    }
+                    /** System.Console.WriteLine(joint.JointType);
+                     System.Console.WriteLine(joint.Position.X + "  : " + myMap.ZoomLevel);**/
                     LocationConverter locConv = new LocationConverter();
                     locConv.ConvertFrom("52.520008,13.404954");
-                    myMap.AnimationLevel = Maps.MapControl.WPF.AnimationLevel.Full;
-                    myMap.SetView((Location)locConv.ConvertFrom("52.520008,13.404954"), 8);
+                    
+                    //myMap.SetView((Location)locConv.ConvertFrom("52.520008,13.404954"), 8);
+            }
+
+        }
+
+        // scales the increasing or decreasing distance between the hands to zoom in and zoom out respectively
+        private void zoomInZoomOutMap(Joint leftHand, Joint rightHand)
+        {
+            double distance_between_hands = Math.Sqrt(Math.Pow(leftHand.Position.X - rightHand.Position.X, 2) + Math.Pow(leftHand.Position.Y - rightHand.Position.Y, 2));
+           // leftHandY.Add(distance_between_hands * 19);
+            
+            int distance_in_integer = Convert.ToInt32(distance_between_hands * zoomScalingValue);
+            Console.WriteLine("Distance between left and right hand: " + distance_in_integer);// if(distance_between_hands)
+            if (distance_in_integer != referenceDistanceBetweenHands)
+            {
+                myMap.ZoomLevel = distance_between_hands * zoomScalingValue;
             }
 
         }
