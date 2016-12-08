@@ -11,11 +11,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows.Media;
     using Microsoft.Kinect;
     using System.Timers;
-    using Maps.MapControl.WPF.Design;
+
     using Maps.MapControl.WPF;
     using System;
     using System.Collections.Generic;
-
+   
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -23,9 +23,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     {
         // some high value is assigned at the begining to calibrate the hands for zoom in zoom out
         int referenceDistanceBetweenHands = 10000;
-        // the distance between hands from kinect is in meters which varies approx. 0 to 1. this needs to be scaled to the zoom level allowed in Bing i.e 1-20.
-        private int zoomScalingValue = 19;
-
+        
         /**List<Double> leftHandX = new List<double>();
         List<Double> leftHandY = new List<double>();
         List<Double> rightHandX = new List<double>();
@@ -401,31 +399,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             rightHandY.Add(joint.Position.Y);
                         }**/
                     }
+                    
                     /** System.Console.WriteLine(joint.JointType);
                      System.Console.WriteLine(joint.Position.X + "  : " + myMap.ZoomLevel);**/
-                    LocationConverter locConv = new LocationConverter();
-                    locConv.ConvertFrom("52.520008,13.404954");
                     
-                    //myMap.SetView((Location)locConv.ConvertFrom("52.520008,13.404954"), 8);
             }
 
         }
 
-        // scales the increasing or decreasing distance between the hands to zoom in and zoom out respectively
-        private void zoomInZoomOutMap(Joint leftHand, Joint rightHand)
-        {
-            double distance_between_hands = Math.Sqrt(Math.Pow(leftHand.Position.X - rightHand.Position.X, 2) + Math.Pow(leftHand.Position.Y - rightHand.Position.Y, 2));
-           // leftHandY.Add(distance_between_hands * 19);
-            
-            int distance_in_integer = Convert.ToInt32(distance_between_hands * zoomScalingValue);
-            Console.WriteLine("Distance between left and right hand: " + distance_in_integer);// if(distance_between_hands)
-            if (distance_in_integer != referenceDistanceBetweenHands)
-            {
-                myMap.ZoomLevel = distance_between_hands * zoomScalingValue;
-            }
-
-        }
-
+        
 
         /// <summary>
         /// Maps a SkeletonPoint to lie within our render space and converts to Point
