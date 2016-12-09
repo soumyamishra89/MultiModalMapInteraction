@@ -10,6 +10,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Kinect;
     public partial class MainWindow 
     {
+
+        int zoominFactor = 2;
+        int zoomoutFactor = 2;
         LocationConverter locConv = new LocationConverter();
        // locConv.ConvertFrom("52.520008,13.404954");
                     // the distance between hands from kinect is in meters which varies approx. 0 to 1. this needs to be scaled to the zoom level allowed in Bing i.e 1-20.
@@ -31,5 +34,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
         }
 
+        // zooms in the map based on a defined zoom factor
+        private void zoominMap()
+        {
+            myMap.ZoomLevel = myMap.ZoomLevel + zoominFactor;
+        }
+
+        // zooms out the map based on a defined zoom factor
+        private void zoomoutMap()
+        {
+            myMap.ZoomLevel = myMap.ZoomLevel - zoominFactor;
+        }
     }
 }

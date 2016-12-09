@@ -100,6 +100,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         int zoomin = 0;
         int zoomout = 0;
         int time = 0;
+        bool isZoomedIn = false;
+        bool isZoomedOut = false;
         Joint joint1 = new Joint();
         Joint joint2 = new Joint();
 
@@ -282,7 +284,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // Hook up the Elapsed event for the timer. 
                 //aTimer.Elapsed += OnTimedEvent;
 
-                DateTime handsclosed=default(DateTime);
+                DateTime handsclosed = default(DateTime);
                 // Draw a transparent background to set the render size
                 //dc.DrawImage(imageSource, rec);
                 //dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));  // only to say the background has to be dark but actually it's not our case
@@ -292,61 +294,71 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     foreach (Skeleton skel in skeletons)
                     {
                         RenderClippedEdges(skel, dc);
-                        
 
-                                if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        {
+                            this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
+                            foreach (Joint joint in skel.Joints)
+                            {
+                                if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
                                 {
-                                    this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
-                                    foreach (Joint joint in skel.Joints)
+                                    if (joint.JointType.Equals(JointType.HandLeft))
                                     {
-                                        if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
-                                        {
-                                            if (joint.JointType.Equals(JointType.HandLeft))
-                                            { joint1 = joint;
-                                            }
-                                            else if (joint.JointType.Equals(JointType.HandRight))
-                                            {
-                                                joint2 = joint;
-                                            }
-                                            if (joint2.Position.X.CompareTo(joint1.Position.X) < 0.1f)
-                                            {
-                                                if (zoomout > 20)
-                                                    dc.DrawRectangle(Brushes.Fuchsia, null, rec);
-                                                //handsclosed = DateTime.Now;
-                                                zoomin = zoomin + 1;
-                                                //dc.DrawRectangle(Brushes.Green, null, rec);
-                                            }
-                                            if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
-                                            {
-                                                //dc.DrawRectangle(Brushes.Green, null, rec);
-                                                if (zoomin > 20)
-                                                    dc.DrawRectangle(Brushes.Green, null, rec);  // zoom in 
-                                                else zoomout = zoomout + 1;
-                                            }
-
-
-                                        }
-                                        //if ((joint2.Position.X+0.65f ) < joint1.Position.X && (joint2.Position.Z<(joint1.Position.Z+0.1) || joint2.Position.Z > (joint1.Position.Z + 0.1)))
-                                        //{
-                                        //dc.DrawRectangle(Brushes.Brown, null, rec);
-                                        //}
-                                        time = time + 1;
-
-                                        if (time == 1000) // roughly 770ms
-                                        {
-                                            time = 0;
-
-                                            //if (incr > 80)
-                                            {
-                                                //MessageBox.Show("increment = "+incr);
-                                                //dc.DrawRectangle(Brushes.Brown, null, rec);
-                                            }
-                                            zoomin = 0;
-                                            zoomout = 0;
-                                        }
+                                        joint1 = joint;
                                     }
+                                    else if (joint.JointType.Equals(JointType.HandRight))
+                                    {
+                                        joint2 = joint;
+                                    }
+                                    //@marion94 CompareTo returns an integer value and not float.
+                                    if (joint2.Position.X.CompareTo(joint1.Position.X) < 0.1f)
+                                    {
+                                        if (zoomout > 20 && !isZoomedOut)
+                                        {
+                                            zoomoutMap();
+                                            isZoomedOut = true;//dc.DrawRectangle(Brushes.Fuchsia, null, rec);
+                                        } //handsclosed = DateTime.Now;
+                                       
+                                        zoomin = zoomin + 1;
+                                        //dc.DrawRectangle(Brushes.Green, null, rec);
+                                    }
+                                    if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
+                                    {
+                                        //dc.DrawRectangle(Brushes.Green, null, rec);
+                                        if (zoomin > 20 && !isZoomedIn)
+                                        {
+                                            zoominMap();
+                                            isZoomedIn = true;//dc.DrawRectangle(Brushes.Green, null, rec);  // zoom in 
+                                        }
+                                        else zoomout = zoomout + 1;
+                                       
+                                    }
+
+
                                 }
-                                else if (skel.TrackingState == SkeletonTrackingState.PositionOnly) // if the skeleton is seated
+                                //if ((joint2.Position.X+0.65f ) < joint1.Position.X && (joint2.Position.Z<(joint1.Position.Z+0.1) || joint2.Position.Z > (joint1.Position.Z + 0.1)))
+                                //{
+                                //dc.DrawRectangle(Brushes.Brown, null, rec);
+                                //}
+                                time = time + 1;
+
+                                if (time == 1000) // roughly 770ms
+                                {
+                                    time = 0;
+
+                                    //if (incr > 80)
+                                    {
+                                        //MessageBox.Show("increment = "+incr);
+                                        //dc.DrawRectangle(Brushes.Brown, null, rec);
+                                    }
+                                    zoomin = 0;
+                                    zoomout = 0;
+                                    isZoomedIn = false;
+                                    isZoomedOut = false;
+                                }
+                            }
+                        }
+                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly) // if the skeleton is seated
                         {
                             dc.DrawEllipse(
                             this.centerPointBrush,
@@ -368,12 +380,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                             //if ((joint2.Position.X+0.65f ) < joint1.Position.X && (joint2.Position.Z<(joint1.Position.Z+0.1) || joint2.Position.Z > (joint1.Position.Z + 0.1)))
                             //{
-                                //dc.DrawRectangle(Brushes.Brown, null, rec);
+                            //dc.DrawRectangle(Brushes.Brown, null, rec);
                             //}
 
-                            if ((joint2.Position.X)<joint1.Position.X && (joint2.Position.X + 0.01f) > joint1.Position.X)
+                            if ((joint2.Position.X) < joint1.Position.X && (joint2.Position.X + 0.01f) > joint1.Position.X)
                             {
                                 handsclosed = DateTime.Now;
+                              
                             }
                             if (DateTime.Now == handsclosed.AddSeconds(1))
                                 dc.DrawRectangle(Brushes.Brown, null, rec);
@@ -382,7 +395,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
 
 
-                
+
                 // prevent drawing outside of our render area
                 //this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
@@ -444,7 +457,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     if (drawBrush != null)
                     {
                         drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);  // draw everything : needed !
-                        zoomInZoomOutMap(skeleton.Joints[JointType.HandLeft], skeleton.Joints[JointType.HandRight]);
+                        //zoomInZoomOutMap(skeleton.Joints[JointType.HandLeft], skeleton.Joints[JointType.HandRight]);
                         //Console.WriteLine(refRightHand.Position.X);
                        /** if (joint.JointType == JointType.HandLeft)
                         {
