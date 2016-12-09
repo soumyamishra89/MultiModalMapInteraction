@@ -96,6 +96,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private DrawingImage imageSource;
 
+        private DateTime handsclosed = default(DateTime);
+        int zoomin = 0;
+        int zoomout = 0;
+        int time = 0;
+        Joint joint1 = new Joint();
+        Joint joint2 = new Joint();
+
+
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -283,12 +292,61 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     foreach (Skeleton skel in skeletons)
                     {
                         RenderClippedEdges(skel, dc);
+                        
 
-                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
-                        {
-                            this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
-                        }
-                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly) // if the skeleton is seated
+                                if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                                {
+                                    this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
+                                    foreach (Joint joint in skel.Joints)
+                                    {
+                                        if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
+                                        {
+                                            if (joint.JointType.Equals(JointType.HandLeft))
+                                            { joint1 = joint;
+                                            }
+                                            else if (joint.JointType.Equals(JointType.HandRight))
+                                            {
+                                                joint2 = joint;
+                                            }
+                                            if (joint2.Position.X.CompareTo(joint1.Position.X) < 0.1f)
+                                            {
+                                                if (zoomout > 20)
+                                                    dc.DrawRectangle(Brushes.Fuchsia, null, rec);
+                                                //handsclosed = DateTime.Now;
+                                                zoomin = zoomin + 1;
+                                                //dc.DrawRectangle(Brushes.Green, null, rec);
+                                            }
+                                            if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
+                                            {
+                                                //dc.DrawRectangle(Brushes.Green, null, rec);
+                                                if (zoomin > 20)
+                                                    dc.DrawRectangle(Brushes.Green, null, rec);  // zoom in 
+                                                else zoomout = zoomout + 1;
+                                            }
+
+
+                                        }
+                                        //if ((joint2.Position.X+0.65f ) < joint1.Position.X && (joint2.Position.Z<(joint1.Position.Z+0.1) || joint2.Position.Z > (joint1.Position.Z + 0.1)))
+                                        //{
+                                        //dc.DrawRectangle(Brushes.Brown, null, rec);
+                                        //}
+                                        time = time + 1;
+
+                                        if (time == 1000) // roughly 770ms
+                                        {
+                                            time = 0;
+
+                                            //if (incr > 80)
+                                            {
+                                                //MessageBox.Show("increment = "+incr);
+                                                //dc.DrawRectangle(Brushes.Brown, null, rec);
+                                            }
+                                            zoomin = 0;
+                                            zoomout = 0;
+                                        }
+                                    }
+                                }
+                                else if (skel.TrackingState == SkeletonTrackingState.PositionOnly) // if the skeleton is seated
                         {
                             dc.DrawEllipse(
                             this.centerPointBrush,
