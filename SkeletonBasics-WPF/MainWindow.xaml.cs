@@ -398,7 +398,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                         {
                                             zoominMap();
                                             isZoomedIn = true;
-                                            //dc.DrawRectangle(Brushes.Black, null, rec);  // zoom in
+                                            dc.DrawRectangle(Brushes.Black, null, rec);  // zoom in
                                             position1.X = 0.5f;
                                             position2.X = 0.5f;
                                             compteur = 0;
