@@ -104,11 +104,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         bool isZoomedOut = false;
         Joint joint1 = new Joint();
         Joint joint2 = new Joint();
+        
 
         private int compteur=0;
+        private int compteurout;
 
-        float position1;
-        float position2;
+        public struct Pos
+        {
+           public  float X;
+           public  float Y;
+        }
+        public Pos position1;
+        public Pos position2;
+        public Pos join1zoomout;
+        public Pos join2zoomout;
 
 
         /// <summary>
@@ -307,67 +316,102 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
                             foreach (Joint joint in skel.Joints)
                             {
+
+
                                 if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
                                 {
                                     if (joint.JointType.Equals(JointType.HandLeft))
                                     {
-                                        joint1 = joint;
+                                        joint1.Position = joint.Position;
                                     }
                                     else if (joint.JointType.Equals(JointType.HandRight))
                                     {
-                                        joint2 = joint;
+                                        joint2.Position = joint.Position;
                                     }
                                     //@marion94 CompareTo returns an integer value and not float.
                                     if (joint2.Position.X < 0.1f && joint1.Position.X > -0.15f)
                                     {
                                         //if (zoomout > 20 && !isZoomedOut)
                                         //{
-                                             //zoomoutMap();
-                                            //isZoomedOut = true;//dc.DrawRectangle(Brushes.Fuchsia, null, rec);
+                                        //zoomoutMap();
+                                        //isZoomedOut = true;//dc.DrawRectangle(Brushes.Fuchsia, null, rec);
                                         //} //handsclosed = DateTime.Now;
-                                       
-                                        //zoomin = zoomin + 1;
-                                        //time = 1;
-                                        position2 = joint2.Position.X;
-                                        position1 = joint1.Position.X;
+
+                                        if (compteurout > 8)
+                                        //&& !isZoomedIn)
+                                        {
+                                            zoomoutMap();
+                                            isZoomedOut = true;
+                                            dc.DrawRectangle(Brushes.Black, null, rec);  // zoom in
+                                            join1zoomout.X = 0.0f;
+                                            join2zoomout.X = 0.0f;
+                                            compteurout  = 0;
+
+                                        }
+                                        position2.X = joint2.Position.X;
+                                        position2.Y = joint2.Position.Y;
+                                        position1.X = joint1.Position.X;
+                                        position1.Y = joint1.Position.Y;
                                         dc.DrawRectangle(Brushes.Black, null, rec);
                                     }
                                     
 
                                     if (joint2.Position.X < 0.5f && joint1.Position.X > -0.5f)
                                     {
-                                        if (position2 < joint2.Position.X && position1 > joint1.Position.X)
+                                        if (position2.X < joint2.Position.X && position1.X > joint1.Position.X) 
                                         {
                                             compteur = compteur + 1;
-                                            if (compteur>1)dc.DrawRectangle(Brushes.Pink, null, rec);
+                                            if (compteur>8)dc.DrawRectangle(Brushes.Purple, null, rec);
                                         }
                                         else if (joint2.Position.X < 0.1f && joint1.Position.X > -0.15f)
                                         {
                                             compteur = 0;
                                             dc.DrawRectangle(Brushes.Green, null, rec);
                                         }
+
+                                        if (join1zoomout.X<joint1.Position.X && join2zoomout.X>joint2.Position.X)
+                                        {
+                                            compteurout = compteurout + 1;
+                                        }
+                                        else if (joint2.Position.X >0.3f && joint1.Position.X<-0.3f)
+                                        {
+                                            compteurout = 0;
+                                        }
                                     }
                                     
                                     
+                                    if ((joint1.Position.Y+0.2f)<position1.Y || (joint2.Position.Y + 0.2f) < position2.Y || (joint1.Position.Y + 0.2f)< join1zoomout.Y || (joint2.Position.Y + 0.2f) < join2zoomout.Y)
+                                    {
+                                        compteur = 0;
+                                        compteurout = 0; 
+                                    }
+
+
                                     if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
                                     {
-                                        //
+                                        dc.DrawRectangle(Brushes.RosyBrown, null, rec);
                                         if (compteur > 8)
-                                            //&& !isZoomedIn)
+                                        //&& !isZoomedIn)
                                         {
                                             zoominMap();
                                             isZoomedIn = true;
                                             //dc.DrawRectangle(Brushes.Black, null, rec);  // zoom in
-                                            position1 = 0.5f;
-                                            position2 = 0.5f;
+                                            position1.X = 0.5f;
+                                            position2.X = 0.5f;
                                             compteur = 0;
 
                                         }
-                                        else { //dc.DrawRectangle(Brushes.Green, null, rec); 
-                                        }
-                                        //else zoomout = zoomout + 1;
-                                        
                                     }
+                                    if (joint2.Position.X > 0.5f && joint1.Position.X < -0.5f)
+                                    { //dc.DrawRectangle(Brushes.Green, null, rec); 
+
+                                        join1zoomout.X = joint1.Position.X;
+                                        join2zoomout.X = joint2.Position.X;
+                                        join1zoomout.Y = joint1.Position.Y;
+                                        join2zoomout.Y = joint2.Position.Y;
+                                    }
+                                        
+                                    
 
 
                                 }
