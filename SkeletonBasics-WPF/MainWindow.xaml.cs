@@ -383,13 +383,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     if ((joint1.Position.Y+0.2f)<position1.Y || (joint2.Position.Y + 0.2f) < position2.Y || (joint1.Position.Y + 0.2f)< join1zoomout.Y || (joint2.Position.Y + 0.2f) < join2zoomout.Y)
                                     {
                                         compteur = 0;
-                                        compteurout = 0; 
+                                        compteurout = 0;
+                                        join1zoomout.X = 0.0f;
+                                        join2zoomout.X = 0.0f;
+                                        dc.DrawRectangle(Brushes.RosyBrown, null, rec);
                                     }
 
 
                                     if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
                                     {
-                                        dc.DrawRectangle(Brushes.RosyBrown, null, rec);
+                                        
                                         if (compteur > 8)
                                         //&& !isZoomedIn)
                                         {
@@ -399,7 +402,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                             position1.X = 0.5f;
                                             position2.X = 0.5f;
                                             compteur = 0;
-
+                                            compteurout = 0;
                                         }
                                     }
                                     if (joint2.Position.X > 0.5f && joint1.Position.X < -0.5f)
