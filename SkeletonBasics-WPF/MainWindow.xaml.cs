@@ -400,7 +400,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
                                     {
                                         
-                                        if (compteur > 8 && !isZoomedIn)
+                                        if (compteur > 7 && !isZoomedIn)
                                         
                                         {
                                             zoominMap();
@@ -431,8 +431,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     //dc.DrawRectangle(Brushes.Green, null, rec);
                                 }
 
-                                if (time>0)
-                                time = time + 1;
+                                
                                 isZoomedIn = false;
                                 isZoomedOut = false;
                             }
