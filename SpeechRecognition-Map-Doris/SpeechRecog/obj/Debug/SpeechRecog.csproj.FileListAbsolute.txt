@@ -1,0 +1,21 @@
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\bin\Debug\SpeechRecog.exe.config
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\bin\Debug\SpeechRecog.exe
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\bin\Debug\SpeechRecog.pdb
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\obj\Debug\SpeechRecog.csprojResolveAssemblyReference.cache
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\obj\Debug\SpeechRecog.Form1.resources
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\obj\Debug\SpeechRecog.Properties.Resources.resources
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\obj\Debug\SpeechRecog.csproj.GenerateResource.Cache
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\obj\Debug\SpeechRecog.exe
+c:\users\sudeep\documents\visual studio 2015\Projects\SpeechRecog\SpeechRecog\obj\Debug\SpeechRecog.pdb
+E:\Student Project\SpeechRecognition-master\SpeechRecog\bin\Debug\SpeechRecog.exe.config
+E:\Student Project\SpeechRecognition-master\SpeechRecog\obj\Debug\SpeechRecog.exe
+E:\Student Project\SpeechRecognition-master\SpeechRecog\obj\Debug\SpeechRecog.pdb
+E:\Student Project\SpeechRecognition-master\SpeechRecog\bin\Debug\SpeechRecog.exe
+E:\Student Project\SpeechRecognition-master\SpeechRecog\bin\Debug\SpeechRecog.pdb
+E:\Student Project\SpeechRecognition-master\SpeechRecog\obj\Debug\SpeechRecog.csprojResolveAssemblyReference.cache
+E:\Student Project\SpeechRecognition-master\SpeechRecog\obj\Debug\SpeechRecog.Form1.resources
+E:\Student Project\SpeechRecognition-master\SpeechRecog\obj\Debug\SpeechRecog.Properties.Resources.resources
+E:\Student Project\SpeechRecognition-master\SpeechRecog\obj\Debug\SpeechRecog.csproj.GenerateResource.Cache
+E:\Student Project\SpeechRecognition-Map\SpeechRecog\bin\Debug\SpeechRecog.exe.config
+E:\Student Project\SpeechRecognition-Map\SpeechRecog\obj\Debug\SpeechRecog.exe
+E:\Student Project\SpeechRecognition-Map\SpeechRecog\obj\Debug\SpeechRecog.pdb
