@@ -104,7 +104,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         bool isZoomedOut = false;
         Joint joint1 = new Joint();
         Joint joint2 = new Joint();
-        
+        Joint hip = new Joint();
 
         private int compteur=0;
         private int compteurout;
@@ -126,6 +126,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         public MainWindow()
         {
             InitializeComponent();
+            initialiseSpeechComponent();
+            myMap.Center= (Location)locConv.ConvertFrom("52.520008,13.404954");
             myMap.AnimationLevel = Maps.MapControl.WPF.AnimationLevel.Full; // adding a animation level to the Map to avoid jerk while transition
         }
 
@@ -316,7 +318,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
                             foreach (Joint joint in skel.Joints)
                             {
-
+                                if (joint.JointType.Equals(JointType.HipCenter))
+                                {
+                                    hip.Position = joint.Position;
+                                }
 
                                 if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
                                 {
@@ -379,13 +384,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                         }
                                     }
                                     
-                                    
-                                    if ((joint1.Position.Y+0.2f)<position1.Y || (joint2.Position.Y + 0.2f) < position2.Y || (joint1.Position.Y + 0.2f)< join1zoomout.Y || (joint2.Position.Y + 0.2f) < join2zoomout.Y)
+                                    if (joint1.Position.Y<hip.Position.Y || joint2.Position.Y<hip.Position.Y)
+                                    //if ((joint1.Position.Y+0.2f)<position1.Y || (joint2.Position.Y + 0.2f) < position2.Y || (joint1.Position.Y + 0.2f)< join1zoomout.Y || (joint2.Position.Y + 0.2f) < join2zoomout.Y)
                                     {
                                         compteur = 0;
                                         compteurout = 0;
                                         join1zoomout.X = 0.0f;
                                         join2zoomout.X = 0.0f;
+                                        position1.X = 0.5f;
+                                        position2.X = 0.5f;
                                         dc.DrawRectangle(Brushes.RosyBrown, null, rec);
                                     }
 
@@ -393,8 +400,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
                                     {
                                         
-                                        if (compteur > 8)
-                                        //&& !isZoomedIn)
+                                        if (compteur > 8 && !isZoomedIn)
+                                        
                                         {
                                             zoominMap();
                                             isZoomedIn = true;
@@ -426,7 +433,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                                 if (time>0)
                                 time = time + 1;
-
+                                isZoomedIn = false;
+                                isZoomedOut = false;
                             }
                         }
                         else if (skel.TrackingState == SkeletonTrackingState.PositionOnly) // if the skeleton is seated

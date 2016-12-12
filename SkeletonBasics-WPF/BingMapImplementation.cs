@@ -19,7 +19,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         int zoominFactor = 2;
         int zoomoutFactor = 2;
         LocationConverter locConv = new LocationConverter();
-        // locConv.ConvertFrom("52.520008,13.404954");
+        // 
         // the distance between hands from kinect is in meters which varies approx. 0 to 1. this needs to be scaled to the zoom level allowed in Bing i.e 1-20.
         private int zoomScalingValue = 19;
 
@@ -97,7 +97,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             string speech = e.Result.Text;
             String[] splitSpeech = speech.Split(' ');
-            
+            Console.WriteLine(speech);
             if (speech.Contains("Zoom-in"))
             {
                 zoominFactor = Array.FindIndex(zoomlevel, value=> value.Equals(splitSpeech[2]));
