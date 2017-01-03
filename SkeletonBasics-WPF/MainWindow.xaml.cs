@@ -106,18 +106,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         Joint joint2 = new Joint();
         Joint hip = new Joint();
 
-        private int compteur=0;
-        private int compteurout;
+        private int counterin=0;
+        private int counterout;
 
         public struct Pos
         {
            public  float X;
            public  float Y;
         }
-        public Pos position1;
-        public Pos position2;
-        public Pos join1zoomout;
-        public Pos join2zoomout;
+        public Pos HandsClosedL;
+        public Pos HandsClosedR;
+        public Pos HandLeftZoomout;
+        public Pos HandRightZoomout;
 
 
         /// <summary>
@@ -288,21 +288,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             using (DrawingContext dc = this.drawingGroup.Open())
             {
 
-                Rect rec = new Rect(50.0, 50.0, 50.0, 50.0);
-                Joint joint1 = new Joint();
-                Joint joint2 = new Joint();
-                Joint jointreg = new Joint();
+                Rect rec = new Rect(50.0, 50.0, 50.0, 50.0); // rectangle that helps debugging. Depending on the color it has different meanings
+                Joint HandLeft = new Joint();
+                Joint HandRight = new Joint();
                 Rect rec2 = new Rect(0.0,0.0,25.0,25.0);
 
-                //dc.DrawRectangle(Brushes.Fuchsia, null, rec2);
-
-                // Create a timer with a two second interval.
-                Timer aTimer = new Timer(1000);
-
-                // Hook up the Elapsed event for the timer. 
-                //aTimer.Elapsed += OnTimedEvent;
-
-                DateTime handsclosed = default(DateTime);
+               
                 // Draw a transparent background to set the render size
                 //dc.DrawImage(imageSource, rec);
                 //dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));  // only to say the background has to be dark but actually it's not our case
@@ -316,119 +307,112 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
                             this.DrawBonesAndJoints(skel, dc);  // draw the skeleton
-                            foreach (Joint joint in skel.Joints)
+                            foreach (Joint joint in skel.Joints) // we go through the whole skeleton
                             {
                                 if (joint.JointType.Equals(JointType.HipCenter))
                                 {
-                                    hip.Position = joint.Position;
+                                    hip.Position = joint.Position; // we track the position of the hip to detect when the hands are down
                                 }
 
                                 if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
                                 {
                                     if (joint.JointType.Equals(JointType.HandLeft))
                                     {
-                                        joint1.Position = joint.Position;
+                                        HandLeft.Position = joint.Position; // we track the position of the left hand because that's what we are interested in
                                     }
                                     else if (joint.JointType.Equals(JointType.HandRight))
                                     {
-                                        joint2.Position = joint.Position;
+                                        HandRight.Position = joint.Position; // we track the position of the right hand because that's what we are interested in
                                     }
-                                    //@marion94 CompareTo returns an integer value and not float.
-                                    if (joint2.Position.X < 0.1f && joint1.Position.X > -0.15f)
+                                    
+                                    if (HandRight.Position.X < 0.1f && HandLeft.Position.X > -0.15f)  // if the hands are closed on to each other in the center
                                     {
-                                        //if (zoomout > 20 && !isZoomedOut)
-                                        //{
-                                        //zoomoutMap();
-                                        //isZoomedOut = true;//dc.DrawRectangle(Brushes.Fuchsia, null, rec);
-                                        //} //handsclosed = DateTime.Now;
+                                       
 
-                                        if (compteurout > 8)
+					// if the hands are closed one to each other, it either means that we start zooming in, or we finish zooming out
+
+                                        if (counterout > 8) // if the hands have decreased from wide opened to close to each other 
                                         //&& !isZoomedIn)
                                         {
-                                            zoomoutMap();
+                                            zoomoutMap(); // we zoom in
                                             isZoomedOut = true;
-                                            dc.DrawRectangle(Brushes.Black, null, rec);  // zoom in
-                                            join1zoomout.X = 0.0f;
-                                            join2zoomout.X = 0.0f;
-                                            compteurout  = 0;
+					    // we initialize the values used before : the wide hands are no longer saved and the compteur goes back to 0
+                                            HandLeftZoomout.X = 0.0f;
+                                            HandRightZoomout.X = 0.0f;
+                                            counterout  = 0;
 
                                         }
-                                        position2.X = joint2.Position.X;
-                                        position2.Y = joint2.Position.Y;
-                                        position1.X = joint1.Position.X;
-                                        position1.Y = joint1.Position.Y;
-                                        dc.DrawRectangle(Brushes.Black, null, rec);
+
+					// if the hands are closed and we haven't zoomed out, we want to zoom in so we save the positions of the hands. Thanks to that, we will see if they get further to each others
+                                        HandsClosedR.X = HandRight.Position.X;
+                                        HandsClosedR.Y = HandRight.Position.Y;
+                                        HandsClosedL.X = HandLeft.Position.X;
+                                        HandsClosedL.Y = HandLeft.Position.Y;
+                                        dc.DrawRectangle(Brushes.Black, null, rec); // if the black rectangles appears, it means the hands are closed to each other
                                     }
                                     
 
-                                    if (joint2.Position.X < 0.5f && joint1.Position.X > -0.5f)
+                                    if (HandRight.Position.X < 0.5f && HandLeft.Position.X > -0.5f) // if the hands are really far one from each other 
                                     {
-                                        if (position2.X < joint2.Position.X && position1.X > joint1.Position.X) 
+                                        if (HandsClosedR.X < HandRight.Position.X && HandsClosedL.X > HandLeft.Position.X) // if the hands are further than when they were closed
                                         {
-                                            compteur = compteur + 1;
-                                            if (compteur>8)dc.DrawRectangle(Brushes.Purple, null, rec);
+                                            counterin = counterin + 1; // we increase a counter which tells us if they more spaced
+                                            if (counterin>8) dc.DrawRectangle(Brushes.Purple, null, rec);
                                         }
-                                        else if (joint2.Position.X < 0.1f && joint1.Position.X > -0.15f)
+                                        else if (HandRight.Position.X < 0.1f && HandLeft.Position.X > -0.15f) // if they stay in the middle or return in the middle before getting very wide we initialize everything again
                                         {
-                                            compteur = 0;
+                                            counterin = 0;
                                             dc.DrawRectangle(Brushes.Green, null, rec);
                                         }
 
-                                        if (join1zoomout.X<joint1.Position.X && join2zoomout.X>joint2.Position.X)
+                                        if (HandLeftZoomout.X<HandLeft.Position.X && HandRightZoomout.X>HandRight.Position.X) // if the hands get closer and closer
                                         {
-                                            compteurout = compteurout + 1;
+                                            counterout = counterout + 1;
                                         }
-                                        else if (joint2.Position.X >0.3f && joint1.Position.X<-0.3f)
+                                        else if (HandRight.Position.X >0.3f && HandLeft.Position.X<-0.3f) // if they don't and go wide again, we initialize everything
                                         {
-                                            compteurout = 0;
+                                            counterout = 0;
                                         }
                                     }
                                     
-                                    if (joint1.Position.Y<hip.Position.Y || joint2.Position.Y<hip.Position.Y)
-                                    //if ((joint1.Position.Y+0.2f)<position1.Y || (joint2.Position.Y + 0.2f) < position2.Y || (joint1.Position.Y + 0.2f)< join1zoomout.Y || (joint2.Position.Y + 0.2f) < join2zoomout.Y)
+                                    if (HandLeft.Position.Y<hip.Position.Y || HandRight.Position.Y<hip.Position.Y)  // if the hands go below the hips, everything is initialized
+                                    //if ((HandLeft.Position.Y+0.2f)<HandsClosedL.Y || (HandRight.Position.Y + 0.2f) < HandsClosedR.Y || (HandLeft.Position.Y + 0.2f)< join1zoomout.Y || (HandRight.Position.Y + 0.2f) < join2zoomout.Y)
                                     {
-                                        compteur = 0;
-                                        compteurout = 0;
-                                        join1zoomout.X = 0.0f;
-                                        join2zoomout.X = 0.0f;
-                                        position1.X = 0.5f;
-                                        position2.X = 0.5f;
+                                        counterin = 0;
+                                        counterout = 0;
+                                        HandLeftZoomout.X = 0.0f;
+                                        HandRightZoomout.X = 0.0f;
+                                        HandsClosedL.X = 0.5f;
+                                        HandsClosedR.X = 0.5f;
                                         dc.DrawRectangle(Brushes.RosyBrown, null, rec);
                                     }
 
 
-                                    if (joint2.Position.X > 0.3f && joint1.Position.X < -0.3f)
+                                    if (HandRight.Position.X > 0.3f && HandLeft.Position.X < -0.3f) // if the hands are wide 
                                     {
                                         
-                                        if (compteur > 7 && !isZoomedIn)
+                                        if (counterin > 7 && !isZoomedIn)  // if they have been closed before and got wider
                                         
                                         {
-                                            zoominMap();
+                                            zoominMap(); // we zoom in
                                             isZoomedIn = true;
-                                            dc.DrawRectangle(Brushes.Black, null, rec);  // zoom in
-                                            position1.X = 0.5f;
-                                            position2.X = 0.5f;
-                                            compteur = 0;
-                                            compteurout = 0;
+                                            HandsClosedL.X = 0.5f;
+                                            HandsClosedR.X = 0.5f;
+                                            counterin = 0;
+                                            counterout = 0;
                                         }
                                     }
-                                    if (joint2.Position.X > 0.5f && joint1.Position.X < -0.5f)
-                                    { //dc.DrawRectangle(Brushes.Green, null, rec); 
-
-                                        join1zoomout.X = joint1.Position.X;
-                                        join2zoomout.X = joint2.Position.X;
-                                        join1zoomout.Y = joint1.Position.Y;
-                                        join2zoomout.Y = joint2.Position.Y;
+                                    if (HandRight.Position.X > 0.5f && HandLeft.Position.X < -0.5f) // if the hands are wide, it can also mean that we want to zoom out, so we save the positions
+                                    { 
+                                        HandLeftZoomout.X = HandLeft.Position.X;
+                                        HandRightZoomout.X = HandRight.Position.X;
+                                        HandLeftZoomout.Y = HandLeft.Position.Y;
+                                        HandRightZoomout.Y = HandRight.Position.Y;
                                     }
                                         
                                     
 
 
-                                }
-
-                                if (joint2.Position.X>0.3f && joint1.Position.X>0.25f && zoomin>20)
-                                {
-                                    //dc.DrawRectangle(Brushes.Green, null, rec);
                                 }
 
                                 
@@ -459,6 +443,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// <summary>
         /// Draws a skeleton's bones and joints
+	/// Since we only need to show the hands, all the others tracks and bones are transparent
         /// </summary>
         /// <param name="skeleton">skeleton to draw</param>
         /// <param name="drawingContext">drawing context to draw to</param>
@@ -512,23 +497,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     if (drawBrush != null)
                     {
                         drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);  // draw everything : needed !
-                        //zoomInZoomOutMap(skeleton.Joints[JointType.HandLeft], skeleton.Joints[JointType.HandRight]);
-                        //Console.WriteLine(refRightHand.Position.X);
-                       /** if (joint.JointType == JointType.HandLeft)
-                        {
-                            leftHandX.Add(joint.Position.X);
-                           // leftHandY.Add(joint.Position.Y);
-                        }
-                        else if (joint.JointType == JointType.HandRight)
-                        {
-                            rightHandX.Add(joint.Position.X);
-                            rightHandY.Add(joint.Position.Y);
-                        }**/
+                        
                     }
-                    
-                    /** System.Console.WriteLine(joint.JointType);
-                     System.Console.WriteLine(joint.Position.X + "  : " + myMap.ZoomLevel);**/
-                    
+                                        
             }
 
         }
