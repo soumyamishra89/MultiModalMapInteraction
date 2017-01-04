@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿ //------------------------------------------------------------------------------
 // <copyright file="MainWindow.xaml.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -63,7 +63,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <summary>
         /// Brush used for drawing joints that are currently tracked
         /// </summary>
-        //private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
         private readonly Brush trackedJointBrush = Brushes.Black;
 
         /// <summary>
@@ -105,6 +104,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         Joint joint1 = new Joint();
         Joint joint2 = new Joint();
         Joint hip = new Joint();
+        Joint head = new Joint();
 
         private int counterin=0;
         private int counterout;
@@ -118,6 +118,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         public Pos HandsClosedR;
         public Pos HandLeftZoomout;
         public Pos HandRightZoomout;
+        public Pos HandRightMoveRight;
+        public Pos HandLeftMoveRight;
+        public Pos HandRightMoveLeft;
+        public Pos HandLeftMoveLeft;
 
 
         /// <summary>
@@ -314,6 +318,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     hip.Position = joint.Position; // we track the position of the hip to detect when the hands are down
                                 }
 
+                                if (joint.JointType.Equals(JointType.Head))
+                                {
+                                    head.Position = joint.Position;
+                                }
+
                                 if (joint.JointType.Equals(JointType.HandLeft) || joint.JointType.Equals(JointType.HandRight))
                                 {
                                     if (joint.JointType.Equals(JointType.HandLeft))
@@ -331,12 +340,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
 					// if the hands are closed one to each other, it either means that we start zooming in, or we finish zooming out
 
-                                        if (counterout > 8) // if the hands have decreased from wide opened to close to each other 
+                                        if (counterout > 7) // if the hands have decreased from wide opened to close to each other 
                                         //&& !isZoomedIn)
                                         {
                                             zoomoutMap(); // we zoom in
                                             isZoomedOut = true;
-					    // we initialize the values used before : the wide hands are no longer saved and the compteur goes back to 0
+					                        // we initialize the values used before : the wide hands are no longer saved and the compteur goes back to 0
                                             HandLeftZoomout.X = 0.0f;
                                             HandRightZoomout.X = 0.0f;
                                             counterout  = 0;
@@ -348,7 +357,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                         HandsClosedR.Y = HandRight.Position.Y;
                                         HandsClosedL.X = HandLeft.Position.X;
                                         HandsClosedL.Y = HandLeft.Position.Y;
-                                        dc.DrawRectangle(Brushes.Black, null, rec); // if the black rectangles appears, it means the hands are closed to each other
+                                        //dc.DrawRectangle(Brushes.Black, null, rec); // if the black rectangles appears, it means the hands are closed to each other
                                     }
                                     
 
@@ -357,12 +366,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                         if (HandsClosedR.X < HandRight.Position.X && HandsClosedL.X > HandLeft.Position.X) // if the hands are further than when they were closed
                                         {
                                             counterin = counterin + 1; // we increase a counter which tells us if they more spaced
-                                            if (counterin>8) dc.DrawRectangle(Brushes.Purple, null, rec);
+                                           // if (counterin>8) dc.DrawRectangle(Brushes.Purple, null, rec);
                                         }
                                         else if (HandRight.Position.X < 0.1f && HandLeft.Position.X > -0.15f) // if they stay in the middle or return in the middle before getting very wide we initialize everything again
                                         {
                                             counterin = 0;
-                                            dc.DrawRectangle(Brushes.Green, null, rec);
+                                            //dc.DrawRectangle(Brushes.Green, null, rec);
                                         }
 
                                         if (HandLeftZoomout.X<HandLeft.Position.X && HandRightZoomout.X>HandRight.Position.X) // if the hands get closer and closer
@@ -376,15 +385,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     }
                                     
                                     if (HandLeft.Position.Y<hip.Position.Y || HandRight.Position.Y<hip.Position.Y)  // if the hands go below the hips, everything is initialized
-                                    //if ((HandLeft.Position.Y+0.2f)<HandsClosedL.Y || (HandRight.Position.Y + 0.2f) < HandsClosedR.Y || (HandLeft.Position.Y + 0.2f)< join1zoomout.Y || (HandRight.Position.Y + 0.2f) < join2zoomout.Y)
-                                    {
+                                     {
                                         counterin = 0;
                                         counterout = 0;
                                         HandLeftZoomout.X = 0.0f;
                                         HandRightZoomout.X = 0.0f;
+                                        HandRightMoveRight.X = 0.5f;
+                                        HandLeftMoveRight.X = -0.5f;
                                         HandsClosedL.X = 0.5f;
                                         HandsClosedR.X = 0.5f;
-                                        dc.DrawRectangle(Brushes.RosyBrown, null, rec);
+                                        //dc.DrawRectangle(Brushes.RosyBrown, null, rec);
                                     }
 
 
@@ -402,6 +412,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                             counterout = 0;
                                         }
                                     }
+
                                     if (HandRight.Position.X > 0.5f && HandLeft.Position.X < -0.5f) // if the hands are wide, it can also mean that we want to zoom out, so we save the positions
                                     { 
                                         HandLeftZoomout.X = HandLeft.Position.X;
@@ -411,6 +422,32 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                     }
                                         
                                     
+                                    // implementation of the moving movement. 
+                                    // we first check if the hands are closed , then when they are left or right to the head. Then we record and check when they pass the previous right/left hand 
+                                    
+                                    if (Math.Abs(Math.Abs(HandLeft.Position.X) - Math.Abs(HandRight.Position.X)) < 0.2 && HandRight.Position.X < head.Position.X && Math.Abs(Math.Abs(HandLeft.Position.X) - Math.Abs(HandRight.Position.X)) > 0.1)
+                                    {
+                                        HandRightMoveRight.X = HandRight.Position.X;
+                                        HandLeftMoveRight.X = HandLeft.Position.X;
+                                        //dc.DrawRectangle(Brushes.DarkBlue, null, rec2);
+                                    }
+                                    if (HandRight.Position.X > head.Position.X)
+                                    {
+                                        if (HandLeft.Position.X > HandRightMoveRight.X)
+                                        { dc.DrawRectangle(Brushes.Gray, null, rec);
+                                            HandRightMoveRight.X = 0.5f;
+                                            HandLeftMoveRight.X = -0.5f;
+
+                                            // MOVE RIGHT
+                                        }
+                                        else
+                                        {
+                                            HandRightMoveRight.X = 0.5f;
+                                            HandLeftMoveRight.X = -0.5f;
+                                        }
+                                    }
+
+
 
 
                                 }
@@ -431,7 +468,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         }
                         
                     }
-                }
+                } 
 
 
 
@@ -480,7 +517,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             // Render Joints
             foreach (Joint joint in skeleton.Joints)
-            if  (joint.JointType==JointType.HandLeft || joint.JointType== JointType.HandRight)
+                if (joint.JointType == JointType.HandLeft || joint.JointType == JointType.HandRight)
             {
                 Brush drawBrush = null;
 
